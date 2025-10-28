@@ -1,0 +1,18 @@
+---
+- name: installin ftp when 
+  hosts: all
+  become: true
+  tasks:
+    - name: installing ftp
+      yum:
+        name: lftp
+        state: installed
+      when: ansible_os_family == "RedHat" 
+
+    - name: installing inetutils-ftp  
+      apt: 
+        name: inetutils-ftp
+        state: latest
+      when: ansible_distribution_major_version == "24"
+...  
+        

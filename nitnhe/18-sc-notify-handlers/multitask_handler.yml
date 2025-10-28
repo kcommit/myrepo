@@ -1,0 +1,31 @@
+---
+- name: Install Apache on Rhel Servers and Start firewalld 
+  hosts: test
+  become: on
+  tasks:
+    - name: Installing Apache 
+      dnf:
+        name: httpd
+        state: latest
+    - name: Configure Apache 
+      copy:
+        content: "Assalam O Alaikum"
+        dest: /var/www/html/index.html
+        owner: apache
+        group: apache
+        mode: 0644
+      notify:
+        - Configure Firewall 
+        - Start Apache
+  handlers:
+    - name: Start Apache
+      service:
+        name: httpd
+        state: started
+    - name: Configure Firewall
+      firewalld:
+        permanent: yes
+        immediate: yes
+        service: http
+        state: enabled
+...  

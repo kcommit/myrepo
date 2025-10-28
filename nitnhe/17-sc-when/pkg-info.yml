@@ -1,0 +1,24 @@
+---
+- name: Query about installed packages
+  hosts: all
+  tasks: 
+    - name: Query on RHEL based machine
+      command: rpm -q vsftpd
+      register: rpm_result
+      when: ansible_os_family == "RedHat"
+
+    - name: Show RHEL result
+      debug:
+        var: rpm_result.stdout
+      when: ansible_os_family == "RedHat"  
+
+    - name: Query on Debain machine
+      command: dpkg -s vsftpd
+      register: dpkg_result
+      when: ansible_os_family == "Debian"
+
+    - name: Show Debian result
+      debug:
+        var: dpkg_result.stdout
+      when: ansible_os_family == "Debian"  
+...  

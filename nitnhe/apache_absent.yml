@@ -1,0 +1,58 @@
+---
+- name: Ensure Apache is fully removed
+  hosts: all
+  gather_facts: yes
+  become: yes
+
+  vars:
+    svc_name: "{{ 'apache2' if ansible_os_family == 'Debian' else 'httpd' }}"
+    pkg_name: "{{ 'apache2*' if ansible_os_family == 'Debian' else 'httpd*' }}"
+    cfg_dir:  "{{ '/etc/apache2' if ansible_os_family == 'Debian' else '/etc/httpd' }}"
+
+  tasks:
+    - name: Stop and disable service if present
+      ansible.builtin.service:
+        name: "{{ svc_name }}"
+        state: stopped
+        enabled: no
+      ignore_errors: true
+
+    - name: Debian | purge packages (removes residual config)
+      ansible.builtin.apt:
+        name: "{{ pkg_name }}"
+        state: absent
+        purge: yes
+        autoremove: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: RHEL | remove packages
+      ansible.builtin.dnf:
+        name: "{{ pkg_name }}"
+        state: absent
+      when: ansible_os_family == 'RedHat'
+
+    - name: Optional | remove config directory
+      ansible.builtin.file:
+        path: "{{ cfg_dir }}"
+        state: absent
+      when: ansible_os_family in ['Debian','RedHat']
+      ignore_errors: true
+
+    - name: Verify service inactive
+      ansible.builtin.shell: "systemctl is-active {{ svc_name }} || echo inactive"
+      register: svc_state
+      changed_when: false
+
+    - name: Show service state
+      ansible.builtin.debug:
+        var: svc_state.stdout
+
+    - name: Verify no listeners on 80/443
+      ansible.builtin.shell: "ss -tuln | egrep ':80|:443' || true"
+      register: listeners
+      changed_when: false
+
+    - name: Show listeners (should be empty)
+      ansible.builtin.debug:
+        var: listeners.stdout
+

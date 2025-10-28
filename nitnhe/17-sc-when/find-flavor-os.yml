@@ -1,0 +1,17 @@
+---
+- name: Find the flavor/distro of OS then print
+  hosts: all
+  tasks:
+    - name: Checking wheter OS is AWS & print
+      shell: echo "This is AWS based machine"
+      when: ansible_distribution == "Amazon"
+
+    - name: Checking wheter OS is RedHat & print.
+      shell: echo "This is RedHat based Machine."
+      when: ansible_distribution == "RedHat"
+
+    - name: Checking wheter Os is Ubuntu & print.  
+      shell: echo "This is Ubuntu based Machine."
+      when: ansible_distribution == "Ubuntu"
+...
+

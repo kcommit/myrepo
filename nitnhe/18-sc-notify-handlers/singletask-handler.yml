@@ -1,0 +1,22 @@
+---
+- name: Install Apache and start with handler
+  hosts: test
+  become: on
+  tasks:
+    - name: Installing the Apache
+      dnf:
+        name: httpd
+        state: latest
+        
+      notify:
+        start apache
+
+  handlers:
+    - name: start apache
+      service: 
+        name: httpd
+        state: started
+...        
+
+
+
